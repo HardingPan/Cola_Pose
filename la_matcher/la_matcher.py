@@ -84,7 +84,6 @@ class Matcher():
     
     def match_key_points(self, p2, p1, d2, d1, mask_points):
         mask_points = (np.array(mask_points)*512).astype(int)
-        print(mask_points)
         p1_to_match, p2_to_match = np.array(p1.cpu().numpy().astype(int)).reshape(-1, 2), \
                                 np.array(p2.cpu().numpy().astype(int)).reshape(-1, 2)
         # 把点的坐标变为LA_matcher的input shape
@@ -121,12 +120,12 @@ class Matcher():
                 matched_points_in_im1.append(kp_successfully_matched_1[i])
                 matched_points_in_im2.append(kp_successfully_matched_2[i])
         
-        return np.array(matched_points_in_im1), np.array(matched_points_in_im2)
+        return np.array(matched_points_in_im1), np.array(matched_points_in_im2), M
 
     def vis_matched_points(self, im1, im2, mask_points):
         p1, d1 = self.get_key_points(im1)
         p2, d2 = self.get_key_points(im2)
-        kp_1, kp_2 = self.match_key_points(p2, p1, d2, d1, mask_points)
+        kp_1, kp_2, _ = self.match_key_points(p2, p1, d2, d1, mask_points)
         total_im = np.concatenate([cv2.resize(im1, (512,512)), cv2.resize(im2, (512,512))], 1)
         for i in range(len(kp_1)):
             pt1 = (int(kp_1[i][0]), int(kp_1[i][1]))
@@ -135,4 +134,6 @@ class Matcher():
             cv.circle(total_im, pt1, 2, (0, 255, 0), -1)
             cv.circle(total_im, pt2, 2, (0, 255, 0), -1)
         return total_im
+    
+
         

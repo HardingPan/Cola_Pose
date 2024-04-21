@@ -16,11 +16,6 @@ import torch
 
 from .transformer import LocalFeatureTransformer
 
-
-
-
-
-
 class MultiHead_two(nn.Module):
     def __init__(self, f_dim, head_size,d_q,d_v):
         super(MultiHead_two, self).__init__()

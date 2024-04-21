@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from la_matcher.la_matcher import Matcher
+from dlt import estimate_camera_matrix
 
 def plot_matches(matches, total_img):
     match_img = total_img.copy()
@@ -26,14 +27,11 @@ matcher = Matcher()
 p_co, d_co = matcher.get_key_points(im_co)
 p_re, d_re = matcher.get_key_points(im_re)
 w, h = im_co.shape[0], im_co.shape[1]
+
 mask_points = [(1068, 552), (1128, 2024), (2122, 2016), (2058, 524)]
 for i in range(len(mask_points)):
     mask_points[i] = [mask_points[i][0] / h, mask_points[i][1] / w]
-# print(type(p))
-# im = matcher.vis_superpoints(im_co)
-# cv2.imwrite("./res.png", im)
-# my_p1, my_p2, vis = matcher.compute(im_co, im_re)
-# cv2.imwrite("./res.png", vis)
-# kp1, kp2 = matcher.match_key_points(p_re, p_co, d_re, d_co, [(1094, 594), (1162, 2002), (2072, 1980), (2010, 580)])
-im = matcher.vis_matched_points(im_co, im_re, mask_points)
-cv2.imwrite("./res.png", im)
+
+co_points, re_points, M = matcher.match_key_points(p_re, p_co, d_re, d_co, mask_points)
+pose_matrix = estimate_camera_matrix(co_points, re_points)
+print(pose_matrix)
