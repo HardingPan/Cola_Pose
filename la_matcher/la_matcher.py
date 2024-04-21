@@ -43,7 +43,8 @@ default_config = {
     }
 
 class Matcher():
-    def __init__(self, path_m='./la_matcher/weights/model_new_temp40.pth', \
+    def __init__(self, im_co, mask_points, \
+                    path_m='./la_matcher/weights/model_new_temp40.pth', \
                     config=default_config, device=default_device) -> None:
         self.device = device
         # 模型初始化
@@ -53,6 +54,13 @@ class Matcher():
         self.f_net.load_state_dict(torch.load(path_m, map_location=device))
         self.net.eval()
         self.f_net.eval()
+        
+        self.p_co, self.d_co = self.get_key_points(im_co)
+        self.w, self.h = im_co.shape[1], im_co.shape[0]
+        self.im_co = im_co
+        for i in range(len(mask_points)):
+            mask_points[i] = [mask_points[i][0] / self.w, mask_points[i][1] / self.h]
+        self.mask_points = (np.array(mask_points)*512).astype(int)
         
     def get_key_points(self, im):
         # resize并转为tensor 
@@ -82,8 +90,9 @@ class Matcher():
             cv.circle(im, (px, py), 5, (0, 255, 0), -1)
         return im
     
-    def match_key_points(self, p2, p1, d2, d1, mask_points):
-        mask_points = (np.array(mask_points)*512).astype(int)
+    def match_key_points(self, im_re):
+        p1, d1 = self.p_co, self.d_co
+        p2, d2 = self.get_key_points(im_re)
         p1_to_match, p2_to_match = np.array(p1.cpu().numpy().astype(int)).reshape(-1, 2), \
                                 np.array(p2.cpu().numpy().astype(int)).reshape(-1, 2)
         # 把点的坐标变为LA_matcher的input shape
@@ -110,7 +119,7 @@ class Matcher():
         kp_successfully_matched_2 = kp_successfully_matched_2[mask]
         
         # 筛选出仅在im1区域内的匹配点
-        im1_polygon = Polygon(mask_points)
+        im1_polygon = Polygon(self.mask_points)
         matched_points_in_im1 = []
         matched_points_in_im2 = []
         for i in range(len(kp_successfully_matched_1)):
@@ -122,11 +131,9 @@ class Matcher():
         
         return np.array(matched_points_in_im1), np.array(matched_points_in_im2), M
 
-    def vis_matched_points(self, im1, im2, mask_points):
-        p1, d1 = self.get_key_points(im1)
-        p2, d2 = self.get_key_points(im2)
-        kp_1, kp_2, _ = self.match_key_points(p2, p1, d2, d1, mask_points)
-        total_im = np.concatenate([cv2.resize(im1, (512,512)), cv2.resize(im2, (512,512))], 1)
+    def vis_matched_points(self, im_re):
+        kp_1, kp_2, _ = self.match_key_points(im_re)
+        total_im = np.concatenate([cv2.resize(self.im_co, (512,512)), cv2.resize(im_re, (512,512))], 1)
         for i in range(len(kp_1)):
             pt1 = (int(kp_1[i][0]), int(kp_1[i][1]))
             pt2 = (int(kp_2[i][0] + 512), int(kp_2[i][1]))
