@@ -14,8 +14,9 @@ matcher = Matcher(im_co, mask_points)
 kp_co, kp_re, M = matcher.match_key_points(im_re)
 im_total = matcher.vis_matched_points(im_re)
 cv2.imwrite("./res.png", im_total)
-depth = 8
+depth = 300
 rt_matrix = dlt.estimate_camera_matrix(kp_co, kp_re, depth)
+print(rt_matrix)
 random_points = dlt.generate_random_points([(1068, 552), (1128, 2024), (2122, 2016), (2058, 524)], depth)
 project_points = dlt.project_points_to_image(random_points, rt_matrix, w, h)
 

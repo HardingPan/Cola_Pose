@@ -87,7 +87,7 @@ def sample_descriptors(keypoints, descriptors,grid_mode, s: int = 8):
     keypoints = keypoints*2 - 1  # normalize to (-1, 1)
     args = {'align_corners': True} if int(torch.__version__[2]) > 2 else {}
     descriptors = torch.nn.functional.grid_sample(
-        descriptors, keypoints.view(b, 1, -1, 2), mode=grid_mode, **args)
+        descriptors, keypoints.view(b, 1, -1, 2), mode=grid_mode, **args, align_corners=True)
     descriptors = torch.nn.functional.normalize(
         descriptors.reshape(b, c, -1), p=2, dim=1)
     return descriptors
@@ -105,7 +105,7 @@ def sample_descriptors_my(keypoints, descriptors,grid_mode, s: int = 8):
     #print(descriptors.shape)
     
     descriptors = torch.nn.functional.grid_sample(
-        descriptors, keypoints.view(b, 1, -1, 2), mode=grid_mode, **args)
+        descriptors, keypoints.view(b, 1, -1, 2), mode=grid_mode, **args, align_corners=True)
     
     descriptors = torch.nn.functional.normalize(
         descriptors.reshape(b, c, -1), p=2, dim=1)
