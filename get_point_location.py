@@ -1,7 +1,7 @@
 import cv2
 
 # 加载大尺寸图片
-image_path = "./data/co_1.bmp"
+image_path = "/Users/panding/workspace/ws_3/data/1/co_1.bmp"
 original_image = cv2.imread(image_path)
 
 # 缩放图像以适应屏幕大小
