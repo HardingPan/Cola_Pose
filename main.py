@@ -24,6 +24,7 @@ mask_points = [(1060, 525), (1060, 2000), (2030, 2000), (2030, 525)]
 matcher = Matcher(im_co, mask_points)
 
 kp_co, kp_re, M = matcher.match_key_points(im_re) # 得到一一对应的关键点
+print(kp_co)
 print(f"匹配点已得到")
 cv2.imwrite("./res/match.png", matcher.vis_matched_points(im_re))
 
@@ -42,13 +43,21 @@ R1, t1 = estimater.recover_pose_by_E()
 # R_t_matrix[:3, 3] = t
 # print(f"得到RT矩阵 \n {R_t_matrix}")
 
-corner_points = [(1146, 674), (1190, 1964), (2048, 1942), (2006, 638)]
-for i in range(4):
+# keypoints = [(1146, 674), (1190, 1964), (2048, 1942), (2006, 638)]
+keypoints = kp_co
+keypoints[:, 0] = keypoints[:, 0] * w/ 512
+keypoints[:, 1] = keypoints[:, 1] * h/ 512
+print(type(keypoints))
+# keypoints = []
+
+
+for i in range(len(keypoints)):
     # # 转换为齐次坐标
     # point_co_homogeneous = np.array([random.randint(1060, 2030), random.randint(525, 2000), 1, 1])
-    point_co_homogeneous = np.array([corner_points[i][0], corner_points[i][1], 1, 1])
+    point_co_homogeneous = np.array([keypoints[i][0], keypoints[i][1], 1, 1])
     point_re = transform_point(point_co_homogeneous, R1, t1)
     cv2.circle(im_co, (int(point_co_homogeneous[0]), int(point_co_homogeneous[1])), 5, (0, 0, 255), -1)
+    cv2.circle(im_co, (int(point_re[0][0]), int(point_re[0][1])), 5, (0, 255, 0), -1)
     cv2.circle(im_re, (int(point_re[0][0]), int(point_re[0][1])), 5, (0, 255, 0), -1)
-    cv2.imwrite("./res/im_co.png", im_co)
-    cv2.imwrite("./res/im_re.png", im_re)
+cv2.imwrite("/Users/panding/Cola_Pose/res/im_co.png", im_co)
+cv2.imwrite("/Users/panding/Cola_Pose/res/im_re.png", im_re)
